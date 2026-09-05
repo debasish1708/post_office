@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostOffice - Premium Postal Portal</title>
+    <!-- Outfit Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind-like style.css will be loaded here -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Background Decorative Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- AUTH GATE -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-card glass-card">
+            <div class="auth-brand">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <h2>PostOffice</h2>
+                <p>Register once, then stay signed in on this browser.</p>
+            </div>
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" data-auth-tab="login">Login</button>
+                <button type="button" class="auth-tab" data-auth-tab="register">Register</button>
+            </div>
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email"><i class="fa-solid fa-envelope"></i> Email</label>
+                    <input type="email" id="login-email" class="glass-input" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="login-password" class="glass-input" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="submit-btn" id="login-submit-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </button>
+            </form>
+            <form id="register-form" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="register-name"><i class="fa-solid fa-user"></i> Full Name</label>
+                    <input type="text" id="register-name" class="glass-input" required placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label for="register-email"><i class="fa-solid fa-envelope"></i> Email</label>
+                    <input type="email" id="register-email" class="glass-input" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label for="register-password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="register-password" class="glass-input" required minlength="4" placeholder="Min 4 characters">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm"><i class="fa-solid fa-lock-open"></i> Confirm Password</label>
+                    <input type="password" id="register-confirm" class="glass-input" required minlength="4" placeholder="Repeat password">
+                </div>
+                <button type="submit" class="submit-btn" id="register-submit-btn">
+                    <i class="fa-solid fa-user-plus"></i> Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-container" hidden>
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-envelope-open-text logo-icon"></i>
+                <div class="logo-text">
+                    <h1>Post<span>Office</span></h1>
+                    <p>Premium Postal & Secure Document Portal</p>
+                </div>
+            </div>
+
+            <!-- Active Session Switcher & Wallet Card -->
+            <div class="header-actions">
+                <div class="user-selector">
+                    <label><i class="fa-solid fa-user-circle"></i> Logged In As:</label>
+                    <strong id="active-user-name">—</strong>
+                    <button type="button" class="glass-btn small" id="logout-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+
+                <div class="wallet-card" id="wallet-card">
+                    <div class="wallet-icon">
+                        <i class="fa-solid fa-coins animate-coin"></i>
+                    </div>
+                    <div class="wallet-info">
+                        <span class="wallet-label">Wallet Balance</span>
+                        <span class="wallet-amount" id="wallet-balance-display">0.00 COINS</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="app-main-grid">
+            
+            <!-- LEFT PANEL: LETTER BOOKING FORM -->
+            <section class="panel form-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-paper-plane"></i> Send Secure Letter</h2>
+                    <p>Upload your letter, choose options, and track the route</p>
+                </div>
+
+                <form id="booking-form" class="booking-form" enctype="multipart/form-data">
+                    <!-- Sender (Read Only) -->
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-circle-arrow-up"></i> Sender</label>
+                        <input type="text" id="sender-display" class="glass-input" readonly value="">
+                    </div>
+
+                    <!-- Receiver -->
+                    <div class="form-group">
+                        <label for="receiver-select"><i class="fa-solid fa-circle-arrow-down"></i> Receiver</label>
+                        <select id="receiver-select" class="glass-select" required>
+                            <option value="">Select a receiver</option>
+                        </select>
+                    </div>
+
+                    <!-- Raw Message -->
+                    <div class="form-group">
+                        <label for="raw-message"><i class="fa-solid fa-align-left"></i> Message <span class="badge badge-optional">Optional</span></label>
+                        <textarea id="raw-message" class="glass-textarea" placeholder="Type a note or raw text message..." rows="3"></textarea>
+                    </div>
+
+                    <!-- File Upload Grid -->
+                    <div class="file-upload-grid">
+                        <!-- Letter Upload -->
+                        <div class="form-group">
+                            <label for="letter-file"><i class="fa-solid fa-file-pdf"></i> Upload Letter <span class="required-star">*</span></label>
+                            <div class="file-drop-zone" id="letter-drop-zone">
+                                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                                <span class="drop-text">PDF or Image</span>
+                                <input type="file" id="letter-file" accept="application/pdf, image/*" required>
+                                <span class="file-name-label" id="letter-file-name-label">No file selected</span>
+                            </div>
+                        </div>
+
+                        <!-- Attachment Upload -->
+                        <div class="form-group">
+                            <label for="attachment-file"><i class="fa-solid fa-image"></i> Attach Image <span class="badge badge-optional">Optional</span></label>
+                            <div class="file-drop-zone" id="attachment-drop-zone">
+                                <i class="fa-solid fa-images drop-icon"></i>
+                                <span class="drop-text">Image attachment</span>
+                                <input type="file" id="attachment-file" accept="image/*">
+                                <span class="file-name-label" id="attachment-file-name-label">No file selected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Service Selector -->
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-truck-fast"></i> Shipping Service & Charge</label>
+                        <div class="service-cards-grid">
+                            <!-- Normal -->
+                            <label class="service-card active">
+                                <input type="radio" name="shipping-service" value="Normal" checked>
+                                <div class="card-content">
+                                    <div class="service-icon"><i class="fa-solid fa-box"></i></div>
+                                    <span class="service-title">Normal</span>
+                                    <span class="service-cost">5 Coins</span>
+                                    <span class="service-duration">4 Days</span>
+                                </div>
+                            </label>
+                            <!-- Speed -->
+                            <label class="service-card">
+                                <input type="radio" name="shipping-service" value="Speed">
+                                <div class="card-content">
+                                    <div class="service-icon"><i class="fa-solid fa-bolt"></i></div>
+                                    <span class="service-title">Speed Post</span>
+                                    <span class="service-cost">20 Coins</span>
+                                    <span class="service-duration">1 Day</span>
+                                </div>
+                            </label>
+                            <!-- Superfast -->
+                            <label class="service-card">
+                                <input type="radio" name="shipping-service" value="Superfast">
+                                <div class="card-content">
+                                    <div class="service-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                                    <span class="service-title">Superfast</span>
+                                    <span class="service-cost">50 Coins</span>
+                                    <span class="service-duration">10 Min</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Price Breakdown Accordion -->
+                    <div class="price-breakdown-card">
+                        <div class="breakdown-header">
+                            <span><i class="fa-solid fa-receipt"></i> Transaction Fee Breakdown</span>
+                            <span class="total-charge" id="breakdown-total">5.00 coins</span>
+                        </div>
+                        <div class="breakdown-details">
+                            <div class="detail-row">
+                                <span>Delivery Cost:</span>
+                                <span id="breakdown-delivery">2.00 coins</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Stamp Duty:</span>
+                                <span id="breakdown-stamp">1.00 coin</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Processing & Platform Fee:</span>
+                                <span id="breakdown-processing">2.00 coins</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="booking-submit-btn">
+                        <i class="fa-solid fa-paper-plane"></i> Send Letter
+                    </button>
+                </form>
+            </section>
+
+            <!-- RIGHT PANEL: SENT/RECEIVED TABS & HISTORY -->
+            <section class="panel tracking-panel">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="sent-tab"><i class="fa-solid fa-upload"></i> Outbox</button>
+                    <button class="tab-btn" data-tab="received-tab"><i class="fa-solid fa-download"></i> Inbox</button>
+                    <button class="tab-btn" data-tab="ledger-tab"><i class="fa-solid fa-history"></i> Ledger</button>
+                </div>
+
+                <div class="tab-content active" id="sent-tab">
+                    <div class="list-placeholder" id="sent-placeholder">
+                        <i class="fa-solid fa-box-open"></i>
+                        <p>No letters sent yet.</p>
+                    </div>
+                    <div class="letters-list" id="sent-letters-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="received-tab">
+                    <div class="list-placeholder" id="received-placeholder">
+                        <i class="fa-solid fa-envelope"></i>
+                        <p>No letters received yet.</p>
+                    </div>
+                    <div class="letters-list" id="received-letters-list">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="ledger-tab">
+                    <div class="ledger-summary">
+                        <div class="ledger-header">
+                            <span>Transaction History</span>
+                            <button id="refresh-ledger-btn" class="glass-btn"><i class="fa-solid fa-sync"></i> Refresh</button>
+                        </div>
+                        <div class="ledger-list-wrapper">
+                            <table class="ledger-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ledger-entries">
+                                    <!-- Loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- UPGRADE SERVICE MODAL -->
+    <div class="modal" id="upgrade-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-circle-chevron-up"></i> Modify Shipping Service</h3>
+                <button class="close-modal-btn" id="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="upgrade-letter-id">
+                <p>You are changing the shipping service for Tracking ID: <strong id="upgrade-tracking-id"></strong>.</p>
+                <p class="warning-alert"><i class="fa-solid fa-circle-info"></i> Changing service while in transit costs <strong>5 coins plus the full new service charge</strong>.</p>
+
+                <div class="form-group mt-3">
+                    <label>Choose New Shipping Service:</label>
+                    <div class="upgrade-cards-grid">
+                        <label class="upgrade-card" id="upgrade-card-normal">
+                            <input type="radio" name="upgrade-service" value="Normal">
+                            <div class="card-content">
+                                <div class="service-icon"><i class="fa-solid fa-box"></i></div>
+                                <span class="service-title">Normal</span>
+                                <span class="service-cost">5 Coins</span>
+                            </div>
+                        </label>
+                        <label class="upgrade-card" id="upgrade-card-speed">
+                            <input type="radio" name="upgrade-service" value="Speed">
+                            <div class="card-content">
+                                <div class="service-icon"><i class="fa-solid fa-bolt"></i></div>
+                                <span class="service-title">Speed Post</span>
+                                <span class="service-cost">20 Coins</span>
+                            </div>
+                        </label>
+                        <label class="upgrade-card" id="upgrade-card-superfast">
+                            <input type="radio" name="upgrade-service" value="Superfast">
+                            <div class="card-content">
+                                <div class="service-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                                <span class="service-title">Superfast</span>
+                                <span class="service-cost">50 Coins</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="surcharge-calculation-card">
+                    <div class="calc-row">
+                        <span>New Service Charge:</span>
+                        <span id="calc-new-charge">0.00 coins</span>
+                    </div>
+                    <div class="calc-row">
+                        <span>Change Fee:</span>
+                        <span>+ 5.00 coins</span>
+                    </div>
+                    <hr>
+                    <div class="calc-row total">
+                        <span>Amount to pay now:</span>
+                        <span id="calc-net-surcharge">0.00 coins</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="glass-btn secondary" id="cancel-upgrade-btn">Cancel</button>
+                <button class="submit-btn" id="confirm-upgrade-btn">Confirm Upgrade</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOCK INBOX CONSOLE DRAWER -->
+    <div class="console-drawer" id="console-drawer">
+        <div class="console-trigger" id="console-trigger">
+            <i class="fa-solid fa-terminal"></i>
+            <span>Simulated Email Client</span>
+            <span class="badge" id="console-badge">0</span>
+        </div>
+        <div class="console-body">
+            <div class="console-header">
+                <h3><i class="fa-solid fa-envelope"></i> SMTP Inbox Simulation Logs</h3>
+                <div class="console-actions">
+                    <button class="glass-btn small" id="clear-console-btn"><i class="fa-solid fa-trash"></i> Clear</button>
+                    <button class="close-console-btn" id="close-console-btn"><i class="fa-solid fa-chevron-down"></i></button>
+                </div>
+            </div>
+            <div class="console-logs" id="console-logs">
+                <div class="log-entry system">
+                    <span class="log-time">[System Setup]</span>
+                    <span class="log-msg">Simulated email server online. When letters are delivered or opened, email records will print here.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

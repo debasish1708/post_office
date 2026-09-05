@@ -1,0 +1,15 @@
+# Maven
+target/
+
+# Uploads
+uploads/
+
+# IDE
+.idea/
+.vscode/
+*.class
+*.jar
+*.war
+*.ear
+.metadata/
+*.log
