@@ -322,7 +322,7 @@ async function loadLedger() {
         const amountClass = t.amount > 0 ? "refund" : (t.type === "UPGRADE" ? "surcharge" : "deduction");
         const amountSign = t.amount > 0 ? "+" : "";
         row.innerHTML = `
-            <td>${new Date(t.createdAt).toLocaleString()}</td>
+            <td>${new Date(t.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
             <td><span class="badge ${String(t.type).toLowerCase()}">${t.type}</span></td>
             <td>${t.description}</td>
             <td class="amount-col ${amountClass}">${amountSign}${parseFloat(t.amount).toFixed(2)}</td>
@@ -381,7 +381,7 @@ function renderSentLetters(letters) {
             <div class="card-top">
                 <div class="meta-info">
                     <h4><i class="fa-solid fa-barcode"></i> ${letter.trackingId}</h4>
-                    <span class="date">Sent: ${new Date(letter.postDate).toLocaleString()}</span>
+                    <span class="date">Sent: ${new Date(letter.postDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
                 </div>
                 <div class="status-badges">
                     <span class="status-badge ${statusClass(letter)}">${displayStatus(letter)}</span>
@@ -390,7 +390,7 @@ function renderSentLetters(letters) {
             </div>
             <div class="card-details">
                 <div class="detail-item"><span class="lbl">To:</span><span class="val">${letter.receiver.name}</span></div>
-                <div class="detail-item"><span class="lbl">Est. Arrival:</span><span class="val">${new Date(letter.receivingDate).toLocaleString()}</span></div>
+                <div class="detail-item"><span class="lbl">Est. Arrival:</span><span class="val">${new Date(letter.receivingDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span></div>
                 <div class="detail-item"><span class="lbl">Now at:</span><span class="val">${letter.currNodeAddress}</span></div>
                 ${letter.message ? `<div class="card-msg">"${letter.message}"</div>` : ""}
             </div>
@@ -491,7 +491,7 @@ function renderReceivedLetters(letters) {
             <div class="card-top">
                 <div class="meta-info">
                     <h4><i class="fa-solid fa-barcode"></i> ${letter.trackingId}</h4>
-                    <span class="date">Booking: ${new Date(letter.postDate).toLocaleString()}</span>
+                    <span class="date">Booking: ${new Date(letter.postDate).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
                 </div>
                 <div class="status-badges">
                     <span class="status-badge ${statusClass(letter)}">${displayStatus(letter)}</span>
@@ -639,7 +639,7 @@ async function loadMockEmails() {
             let bodyText = email.body.replace(/OTP: (\d{6})/,
                 'OTP: <strong style="color:var(--warning);background:rgba(245,158,11,0.1);padding:2px 6px;border-radius:4px;">$1</strong>');
             entry.innerHTML = `
-                <span class="log-time">${new Date(email.timestamp).toLocaleString()}</span>
+                <span class="log-time">${new Date(email.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
                 <span class="log-recipient">To: ${email.to}</span>
                 <span class="log-subject">Sub: ${email.subject}</span>
                 <span class="log-msg">${bodyText}</span>`;

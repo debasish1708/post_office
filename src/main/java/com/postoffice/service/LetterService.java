@@ -246,6 +246,16 @@ public class LetterService {
     }
 
     @Transactional
+    public void processMorningBatchDelivery() {
+        List<Letter> morningBatch = letterRepository.findMorningBatch(
+                PostStatus.arrived,
+                List.of("normal_post", "super_fast"));
+        for (Letter letter : morningBatch) {
+            deliverLetter(letter);
+        }
+    }
+
+    @Transactional
     public void resetMonthlyWallets() {
         BigDecimal allowance = new BigDecimal("100.00");
         for (User user : userRepository.findByDeletedAtIsNull()) {

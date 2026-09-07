@@ -12,9 +12,14 @@ public class DeliveryScheduler {
         this.letterService = letterService;
     }
 
-    @Scheduled(cron = "0 0 6 * * *", zone = "Asia/Kolkata")
+    @Scheduled(cron = "0 10 0 * * *", zone = "Asia/Kolkata")
     public void dailyNodeHops() {
         letterService.runDailyHops();
+    }
+
+    @Scheduled(cron = "0 0 6 * * *", zone = "Asia/Kolkata")
+    public void morningBatchDelivery() {
+        letterService.processMorningBatchDelivery();
     }
 
     @Scheduled(fixedRate = 600000)

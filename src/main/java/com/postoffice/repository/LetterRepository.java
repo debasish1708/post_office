@@ -23,4 +23,6 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
     List<Letter> findDueSuperfast(@Param("statuses") List<PostStatus> statuses,
                                   @Param("slug") String slug,
                                   @Param("now") LocalDateTime now);
+    @Query("SELECT l FROM Letter l WHERE l.status != :status AND l.service.slug IN :slugs AND FUNCTION('DATE', l.receivingDate) = CURRENT_DATE")
+    List<Letter> findMorningBatch(@Param("status") PostStatus status, @Param("slugs") List<String> slugs);
 }
