@@ -24,7 +24,12 @@ public class SupabaseStorageService {
 
     public String uploadFile(MultipartFile file, String folder) {
         try {
-            String fileName = folder + "/" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String fileName = folder + "/" + java.util.UUID.randomUUID().toString() + fileExtension;
             String url = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + fileName;
 
             HttpHeaders headers = new HttpHeaders();
