@@ -79,19 +79,28 @@ public class SupabaseStorageService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         
         HttpEntity<String> entity = new HttpEntity<>(
-            "{\"prefix\": \"\", \"limit\": 1000, \"offset\": 0}", 
+            "{\"prefix\": \"letters/\", \"limit\": 1000, \"offset\": 0}", 
             headers
         );
         
-        ResponseEntity<java.util.List<java.util.Map<String, Object>>> response = restTemplate.exchange(
-            url, HttpMethod.POST, entity, 
-            new org.springframework.core.ParameterizedTypeReference<>() {}
-        );
+        try {
+            ResponseEntity<java.util.List<java.util.Map<String, Object>>> response = restTemplate.exchange(
+                url, HttpMethod.POST, entity, 
+                new org.springframework.core.ParameterizedTypeReference<>() {}
+            );
 
-        return response.getBody().stream()
-                .map(m -> (String) m.get("name"))
-                .map(name -> name) // Assumes no subfolders, otherwise prefix logic needed
-                .toList();
+            if (response.getBody() == null) {
+                return java.util.Collections.emptyList();
+            }
+
+            return response.getBody().stream()
+                    .map(m -> (String) m.get("name"))
+                    .toList();
+        } catch (Exception e) {
+            System.err.println("Error listing files: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error listing files from Supabase", e);
+        }
     }
 
     public void deleteAllFiles() {
@@ -107,11 +116,16 @@ public class SupabaseStorageService {
         headers.set("Authorization", "Bearer " + supabaseKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        // Corrected key to "objects" as required by Supabase API
         java.util.Map<String, java.util.List<String>> body = java.util.Map.of("objects", paths);
         HttpEntity<java.util.Map<String, java.util.List<String>>> entity = new HttpEntity<>(body, headers);
         
-        restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        try {
+            restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        } catch (Exception e) {
+            System.err.println("Error deleting files: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error deleting files from Supabase", e);
+        }
     }
 
     public String getPublicUrl(String path) {

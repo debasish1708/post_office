@@ -19,6 +19,8 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     List<Letter> findByStatusIn(List<PostStatus> statuses);
 
+    Optional<Letter> findByLetterImageOrAttachmentImage(String letterImage, String attachmentImage);
+
     @Query("SELECT l FROM Letter l WHERE l.status IN :statuses AND l.service.slug = :slug AND l.receivingDate <= :now")
     List<Letter> findDueSuperfast(@Param("statuses") List<PostStatus> statuses,
                                   @Param("slug") String slug,

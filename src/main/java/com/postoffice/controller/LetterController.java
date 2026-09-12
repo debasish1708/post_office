@@ -7,6 +7,8 @@ import com.postoffice.repository.LetterRepository;
 import com.postoffice.service.AuthService;
 import com.postoffice.service.LetterService;
 import com.postoffice.service.SupabaseStorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import java.util.Map;
 @RequestMapping("/api/letters")
 public class LetterController {
 
+    private static final Logger log = LoggerFactory.getLogger(LetterController.class);
     private final LetterService letterService;
     private final LetterRepository letterRepository;
     private final AuthService authService;
@@ -105,14 +108,17 @@ public class LetterController {
     public ResponseEntity<byte[]> downloadFile(@PathVariable String path) {
         try {
             User user = authService.requireCurrentUser();
-            Letter letter = letterRepository.findAll().stream()
-                    .filter(l -> path.equals(l.getLetterImage()) || path.equals(l.getAttachmentImage()))
-                    .findFirst()
+            log.info("Download requested by user {}: {}", user.getId(), path);
+            
+            Letter letter = letterRepository.findByLetterImageOrAttachmentImage(path, path)
                     .orElse(null);
+            
             if (letter == null) {
+                log.warn("Letter not found for path: {}", path);
                 return ResponseEntity.notFound().build();
             }
             if (!letter.getReceiver().getId().equals(user.getId()) || !letter.isRead()) {
+                log.warn("Access denied: user {} (isRead: {}), letter {}", user.getId(), letter.isRead(), letter.getId());
                 return ResponseEntity.status(403).build();
             }
 
@@ -125,6 +131,7 @@ public class LetterController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .body(data);
         } catch (Exception e) {
+            log.error("Download error for path {}: {}", path, e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
