@@ -116,15 +116,21 @@ public class SupabaseStorageService {
         headers.set("Authorization", "Bearer " + supabaseKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        java.util.Map<String, java.util.List<String>> body = java.util.Map.of("objects", paths);
-        HttpEntity<java.util.Map<String, java.util.List<String>>> entity = new HttpEntity<>(body, headers);
-        
-        try {
-            restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
-        } catch (Exception e) {
-            System.err.println("Error deleting files: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error deleting files from Supabase", e);
+        // Process in batches of 50 to avoid API request size/count limits
+        int batchSize = 50;
+        for (int i = 0; i < paths.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, paths.size());
+            java.util.List<String> batch = paths.subList(i, end);
+            
+            java.util.Map<String, java.util.List<String>> body = java.util.Map.of("objects", batch);
+            HttpEntity<java.util.Map<String, java.util.List<String>>> entity = new HttpEntity<>(body, headers);
+            
+            try {
+                restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+            } catch (Exception e) {
+                System.err.println("Error deleting batch of files: " + e.getMessage());
+                throw new RuntimeException("Error deleting batch of files from Supabase", e);
+            }
         }
     }
 
