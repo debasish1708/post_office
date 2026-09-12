@@ -116,7 +116,8 @@ public class LetterController {
                 return ResponseEntity.status(403).build();
             }
 
-            byte[] data = supabaseStorageService.downloadFile(path);
+            String fullPath = path.startsWith("letters/") ? path : "letters/" + path;
+            byte[] data = supabaseStorageService.downloadFile(fullPath);
             String filename = path.contains("/") ? path.substring(path.lastIndexOf('/') + 1) : path;
 
             return ResponseEntity.ok()

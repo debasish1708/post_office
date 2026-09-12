@@ -29,8 +29,9 @@ public class SupabaseStorageService {
             if (originalFilename != null && originalFilename.contains(".")) {
                 fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
-            String fileName = folder + "/" + java.util.UUID.randomUUID().toString() + fileExtension;
-            String url = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + fileName;
+            String filename = java.util.UUID.randomUUID().toString() + fileExtension;
+            String path = folder + "/" + filename;
+            String url = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + path;
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + supabaseKey);
@@ -43,7 +44,7 @@ public class SupabaseStorageService {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                return fileName; // Returning path
+                return filename; // Returning only filename
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload file to Supabase", e);

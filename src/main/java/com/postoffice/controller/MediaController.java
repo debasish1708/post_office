@@ -23,7 +23,8 @@ public class MediaController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteMedia(@RequestParam("path") String path) {
-        supabaseStorageService.deleteFile(path);
+        String fullPath = path.startsWith("letters/") ? path : "letters/" + path;
+        supabaseStorageService.deleteFile(fullPath);
         return ResponseEntity.ok(Map.of("message", "File deleted successfully"));
     }
 
