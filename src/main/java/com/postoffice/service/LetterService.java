@@ -34,6 +34,7 @@ public class LetterService {
     private final WalletLedgerRepository ledgerRepository;
     private final MailService mailService;
     private final RouteCatalog routeCatalog;
+    private final SupabaseStorageService supabaseStorageService;
 
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
@@ -43,13 +44,15 @@ public class LetterService {
                          PostalServiceRepository postalServiceRepository,
                          WalletLedgerRepository ledgerRepository,
                          MailService mailService,
-                         RouteCatalog routeCatalog) {
+                         RouteCatalog routeCatalog,
+                         SupabaseStorageService supabaseStorageService) {
         this.letterRepository = letterRepository;
         this.userRepository = userRepository;
         this.postalServiceRepository = postalServiceRepository;
         this.ledgerRepository = ledgerRepository;
         this.mailService = mailService;
         this.routeCatalog = routeCatalog;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     @PostConstruct
@@ -90,10 +93,10 @@ public class LetterService {
         sender.setBalance(sender.getBalance().subtract(charge));
         userRepository.save(sender);
 
-        String letterImage = saveFile(letterFile);
+        String letterImage = supabaseStorageService.uploadFile(letterFile, "letters");
         String attachmentImage = null;
         if (attachmentFile != null && !attachmentFile.isEmpty()) {
-            attachmentImage = saveFile(attachmentFile);
+            attachmentImage = supabaseStorageService.uploadFile(attachmentFile, "letters");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -332,17 +335,5 @@ public class LetterService {
         row.setType(type);
         row.setDescription(description);
         ledgerRepository.save(row);
-    }
-
-    private String saveFile(MultipartFile file) throws IOException {
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        }
-        String newFilename = UUID.randomUUID() + fileExtension;
-        Path targetPath = Paths.get(uploadDir).resolve(newFilename);
-        Files.copy(file.getInputStream(), targetPath);
-        return newFilename;
     }
 }

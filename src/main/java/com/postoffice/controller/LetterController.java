@@ -6,8 +6,7 @@ import com.postoffice.model.User;
 import com.postoffice.repository.LetterRepository;
 import com.postoffice.service.AuthService;
 import com.postoffice.service.LetterService;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import com.postoffice.service.SupabaseStorageService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +25,16 @@ public class LetterController {
     private final LetterService letterService;
     private final LetterRepository letterRepository;
     private final AuthService authService;
+    private final SupabaseStorageService supabaseStorageService;
 
     public LetterController(LetterService letterService,
                             LetterRepository letterRepository,
-                            AuthService authService) {
+                            AuthService authService,
+                            SupabaseStorageService supabaseStorageService) {
         this.letterService = letterService;
         this.letterRepository = letterRepository;
         this.authService = authService;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -102,12 +101,12 @@ public class LetterController {
         }
     }
 
-    @GetMapping("/download/{filename:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
+    @GetMapping("/download/{path:.*}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable String path) {
         try {
             User user = authService.requireCurrentUser();
             Letter letter = letterRepository.findAll().stream()
-                    .filter(l -> filename.equals(l.getLetterImage()) || filename.equals(l.getAttachmentImage()))
+                    .filter(l -> path.equals(l.getLetterImage()) || path.equals(l.getAttachmentImage()))
                     .findFirst()
                     .orElse(null);
             if (letter == null) {
@@ -117,22 +116,14 @@ public class LetterController {
                 return ResponseEntity.status(403).build();
             }
 
-            Path filePath = letterService.getFilePath(filename);
-            Resource resource = new UrlResource(filePath.toUri());
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
-            String contentType = Files.probeContentType(filePath);
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
+            byte[] data = supabaseStorageService.downloadFile(path);
+            String filename = path.contains("/") ? path.substring(path.lastIndexOf('/') + 1) : path;
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
-        } catch (MalformedURLException e) {
-            return ResponseEntity.internalServerError().build();
-        } catch (IOException e) {
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .body(data);
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
