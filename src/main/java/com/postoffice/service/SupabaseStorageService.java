@@ -107,7 +107,8 @@ public class SupabaseStorageService {
         headers.set("Authorization", "Bearer " + supabaseKey);
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        java.util.Map<String, java.util.List<String>> body = java.util.Map.of("prefixes", paths);
+        // Corrected key to "objects" as required by Supabase API
+        java.util.Map<String, java.util.List<String>> body = java.util.Map.of("objects", paths);
         HttpEntity<java.util.Map<String, java.util.List<String>>> entity = new HttpEntity<>(body, headers);
         
         restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
